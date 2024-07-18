@@ -17,20 +17,20 @@ MODULE_AUTHOR("Adriano Marto Reis");
 MODULE_DESCRIPTION("Software-UART for Raspberry Pi");
 MODULE_VERSION("0.2");
 
-static int gpio_tx = 17;
+static int gpio_tx = 527;
 module_param(gpio_tx, int, 0);
 
-static int gpio_rx = 27;
+static int gpio_rx = 526;
 module_param(gpio_rx, int, 0);
 
 // Module prototypes.
 static int  soft_uart_open(struct tty_struct*, struct file*);
 static void soft_uart_close(struct tty_struct*, struct file*);
-static int  soft_uart_write(struct tty_struct*, const unsigned char*, int);
+static long int soft_uart_write(struct tty_struct*, const unsigned char*, long unsigned int);
 static unsigned int soft_uart_write_room(struct tty_struct*);
 static void soft_uart_flush_buffer(struct tty_struct*);
 static unsigned int soft_uart_chars_in_buffer(struct tty_struct*);
-static void soft_uart_set_termios(struct tty_struct*, struct ktermios*);
+static void soft_uart_set_termios(struct tty_struct*, const struct ktermios*);
 static void soft_uart_stop(struct tty_struct*);
 static void soft_uart_start(struct tty_struct*);
 static void soft_uart_hangup(struct tty_struct*);
@@ -72,13 +72,13 @@ static struct tty_port port;
 static int __init soft_uart_init(void)
 {
   printk(KERN_INFO "soft_uart: Initializing module...\n");
-  
+
   if (!raspberry_soft_uart_init(gpio_tx, gpio_rx))
   {
     printk(KERN_ALERT "soft_uart: Failed initialize GPIO.\n");
     return -ENOMEM;
   }
-    
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
   printk(KERN_INFO "soft_uart: LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0).\n");
 
@@ -218,7 +218,7 @@ static void soft_uart_close(struct tty_struct* tty, struct file* file)
  * @param buffer_size number of bytes contained in the given buffer
  * @return number of bytes successfuly written into the TTY device
  */
-static int soft_uart_write(struct tty_struct* tty, const unsigned char* buffer, int buffer_size)
+static long int soft_uart_write(struct tty_struct* tty, const unsigned char* buffer, long unsigned int buffer_size)
 {
   return raspberry_soft_uart_send_string(buffer, buffer_size);
 }
@@ -256,7 +256,7 @@ static unsigned int soft_uart_chars_in_buffer(struct tty_struct* tty)
  * @param tty given TTY
  * @param termios parameters
  */
-static void soft_uart_set_termios(struct tty_struct* tty, struct ktermios* termios)
+static void soft_uart_set_termios(struct tty_struct* tty, const struct ktermios* termios)
 {
   int cflag = 0;
   speed_t baudrate = tty_get_baud_rate(tty);
