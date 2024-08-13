@@ -23,6 +23,9 @@ module_param(gpio_tx, int, 0);
 static int gpio_rx = 526;
 module_param(gpio_rx, int, 0);
 
+static int baud_rate = 9600;
+module_param(baud_rate, int, 0);
+
 // Module prototypes.
 static int  soft_uart_open(struct tty_struct*, struct file*);
 static void soft_uart_close(struct tty_struct*, struct file*);
@@ -118,9 +121,9 @@ static int __init soft_uart_init(void)
   soft_uart_driver->type                  = TTY_DRIVER_TYPE_SERIAL;
   soft_uart_driver->subtype               = SERIAL_TYPE_NORMAL;
   soft_uart_driver->init_termios          = tty_std_termios;
-  soft_uart_driver->init_termios.c_ispeed = 4800;
-  soft_uart_driver->init_termios.c_ospeed = 4800;
-  soft_uart_driver->init_termios.c_cflag  = B4800 | CREAD | CS8 | CLOCAL;
+  soft_uart_driver->init_termios.c_ispeed = baud_rate;
+  soft_uart_driver->init_termios.c_ospeed = baud_rate;
+  soft_uart_driver->init_termios.c_cflag  = BOTHER | CREAD | CS8 | CLOCAL;
 
   // Sets the callbacks for the driver.
   tty_set_operations(soft_uart_driver, &soft_uart_operations);
